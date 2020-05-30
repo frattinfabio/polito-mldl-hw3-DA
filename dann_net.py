@@ -70,20 +70,15 @@ class DannNet(nn.Module):
         )
 
     def forward(self, x, alpha = None):
-        features = self.features
-        features = features.view(features.size(0), -1)
+        features = self.features(x)
+        features = self.avgpool(features)
+        features = torch.flatten(features,1)
         if alpha is not None:
-            reverse_feature = ReverseLayerF.apply(features, alpha)
-            x = reverse_features(x)
-            x = self.avgpool(x)
-            x = torch.flatten(x,1)
-            discriminator_output = self.dann_classifier(x)
+            reverse_features = ReverseLayerF.apply(features, alpha)
+            discriminator_output = self.dann_classifier(reverse_features)
             return discriminator_output
         else:
-             x = features(x)
-             x = self.avgpool(x)
-             x = torch.flatten(x, 1)
-             class_outputs = self.classifier(x)
+             class_outputs = self.classifier(features)
              return class_outputs
 
 
